@@ -1,7 +1,8 @@
 /**
  * ==========================================================================
  * ADMIN PORTAL SHARED JAVASCRIPT - SHOPCLOTH / ADMINSTORE
- * Utilities, Formatters, Toast, Confirmation Dialogs, Sidebar & State Handlers
+ * GIAO DIỆN MÔ PHỎNG QUẢN TRỊ VIÊN - KHÔNG CÓ CƠ SỞ DỮ LIỆU
+ * Chỉ giữ lại các nút bấm và hiển thị giao diện thuần túy
  * ==========================================================================
  */
 
@@ -55,7 +56,7 @@ function showToast(message, type = 'success') {
     toast.style.opacity = '0';
     toast.style.transform = 'translateY(10px)';
     setTimeout(() => toast.remove(), 300);
-  }, 3200);
+  }, 2500);
 }
 
 // Hộp thoại xác nhận toàn cục
@@ -101,8 +102,7 @@ function showConfirm({ title, message, confirmText = 'Xác nhận', confirmClass
   };
 }
 
-// Khởi tạo Dữ liệu Đơn Hàng Mẫu nếu chưa có trong localStorage
-// Items đồng bộ với sản phẩm trong trang Quản lý Sản phẩm (products.js) và trang Sản phẩm khách (main.js)
+// Danh sách đơn hàng mẫu tĩnh phục vụ hiển thị
 const DEFAULT_ADMIN_ORDERS = [
   { id: "ORD-9021", customer: "Nguyễn Văn An", phone: "0901234567", address: "123 Lê Lợi, Q.1", location: "Hồ Chí Minh", date: "2026-10-15", total: 3118000, status: "Chưa xác nhận", items: [["Áo Khoác Da Lộn Nam Cao Cấp (Đen)", 2, 1299000], ["Quần Jean Slimfit Co Giãn Nam", 1, 520000]] },
   { id: "ORD-9022", customer: "Trần Thị Bích", phone: "0912345678", address: "45 Hàng Bài, Hoàn Kiếm", location: "Hà Nội", date: "2026-10-14", total: 350000, status: "Đã xác nhận", items: [["Áo Khoác Bomber Da Bò Màu Nâu", 1, 350000]] },
@@ -120,32 +120,23 @@ const DEFAULT_ADMIN_ORDERS = [
   { id: "ORD-9034", customer: "Hoàng Gia Bảo", phone: "0918234567", address: "15 Lê Thánh Tôn, Bến Nghé", location: "Hồ Chí Minh", date: "2026-10-07", total: 629000, status: "Đã giao", items: [["Áo Sơ Mi Oxford Dài Tay Nam", 1, 450000], ["Quần Jean Slimfit Co Giãn Nam", 1, 520000]] }
 ];
 
-// Đơn hàng được lưu trực tiếp trong mã nguồn (không sử dụng localStorage)
-let adminOrders = [...DEFAULT_ADMIN_ORDERS];
-
 function getAdminOrders() {
-  // Trả về mảng đơn hàng hiện tại trong bộ nhớ
-  return adminOrders;
+  return DEFAULT_ADMIN_ORDERS;
 }
 
 function saveAdminOrders(orders) {
-  // Cập nhật biến trong bộ nhớ thay vì localStorage
-  adminOrders = [...orders];
-  updateSidebarBadges();
+  // Chỉ mô phỏng giao diện, không lưu vào DB
 }
 
 // Cập nhật số lượng đơn hàng chưa xác nhận trên Badge của Sidebar
 function updateSidebarBadges() {
-  try {
-    const orders = getAdminOrders();
-    const pendingCount = orders.filter(o => o.status === 'Chưa xác nhận').length;
-    document.querySelectorAll('#sidePendingCount, .side-pending-badge').forEach(el => {
-      el.textContent = pendingCount > 0 ? `${pendingCount} mới` : '0';
-    });
-  } catch (_) {}
+  const pendingCount = DEFAULT_ADMIN_ORDERS.filter(o => o.status === 'Chưa xác nhận').length;
+  document.querySelectorAll('#sidePendingCount, .side-pending-badge').forEach(el => {
+    el.textContent = `${pendingCount} mới`;
+  });
 }
 
-// Cập nhật thông tin ngày tháng và sự kiện chung
+// Cập nhật thông tin và sự kiện chung
 document.addEventListener('DOMContentLoaded', () => {
   // Mobile Sidebar Toggle
   const sidebar = document.querySelector('.admin-sidebar');
@@ -164,27 +155,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Set current date on date-badge
-  const datePill = document.querySelector('#currentDateBadge');
-  if (datePill) {
-    const now = new Date();
-    datePill.textContent = now.toLocaleDateString('vi-VN', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  }
-
-  // Global ESC to close modals
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.modal-backdrop.open').forEach(modal => {
-        modal.classList.remove('open');
-      });
-    }
-  });
-
-  // Đồng bộ badge số đơn chưa xác nhận
   updateSidebarBadges();
 });

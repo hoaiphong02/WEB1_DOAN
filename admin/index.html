@@ -352,20 +352,9 @@
         sidePending.textContent = `${pendingOrders.length} mới`;
       }
 
-      // 3. Người dùng & Sản phẩm (Nếu có trong localStorage)
-      try {
-        const users = JSON.parse(localStorage.getItem('shopcloth_admin_users') || 'null');
-        if (users && users.length) {
-          document.querySelector('#dashboardUserCount').textContent = `${users.length} người`;
-        }
-      } catch (_) { }
-
-      try {
-        const products = JSON.parse(localStorage.getItem('shopcloth_admin_products') || 'null');
-        if (products && products.length) {
-          document.querySelector('#dashboardProductCount').textContent = `${products.length} mã`;
-        }
-      } catch (_) { }
+      // 3. Người dùng & Sản phẩm mặc định
+      document.querySelector('#dashboardUserCount').textContent = '10 người';
+      document.querySelector('#dashboardProductCount').textContent = '10 mã';
 
       // 4. Phân bổ tỷ lệ đơn hàng (Status breakdown)
       const total = orders.length;

@@ -1,11 +1,12 @@
 /**
  * ==========================================================================
  * JAVASCRIPT GIAO DIỆN KHÁCH HÀNG (ShopCloth Frontend)
- * Quản lý giỏ hàng, đặt hàng, tài khoản và đồng bộ với hệ thống Admin
+ * CHỈ PHỤC VỤ HIỂN THỊ GIAO DIỆN MÔ PHỎNG - HOÀN TOÀN KHÔNG CÓ CƠ SỞ DỮ LIỆU
+ * Không lưu dữ liệu, không xử lý logic backend, chỉ hiển thị UI tĩnh
  * ==========================================================================
  */
 
-// Danh mục sản phẩm thời trang mặc định của Shop
+// Danh mục sản phẩm thời trang mặc định của Shop (Dữ liệu tĩnh để hiển thị giao diện)
 const SHOP_PRODUCTS = [
   {
     id: 1,
@@ -89,154 +90,122 @@ const SHOP_PRODUCTS = [
   }
 ];
 
+// Danh sách sản phẩm mẫu cố định hiển thị trong giỏ hàng (Giao diện tĩnh)
+const DEMO_CART_ITEMS = [
+  {
+    id: 1,
+    name: 'Áo Khoác Da Lộn Nam Cao Cấp (Đen)',
+    price: 1299000,
+    image: 'images/product-jacket-black.png',
+    quantity: 1
+  },
+  {
+    id: 5,
+    name: 'Quần Jean Slimfit Co Giãn Nam',
+    price: 520000,
+    image: 'images/product-pant-jean.png',
+    quantity: 1
+  }
+];
+
+// Đơn hàng mẫu cố định phục vụ hiển thị chi tiết đơn và lịch sử (Giao diện tĩnh)
+const DEMO_CUSTOMER_ORDERS = [
+  {
+    id: 'ORD-9021',
+    customer: 'Nguyễn Văn An',
+    phone: '0901234567',
+    address: '123 Lê Lợi, Phường Bến Nghé, Quận 1',
+    location: 'Hồ Chí Minh',
+    date: '2026-10-15',
+    total: 3118000,
+    status: 'Chưa xác nhận',
+    items: [
+      ['Áo Khoác Da Lộn Nam Cao Cấp (Đen)', 2, 1299000],
+      ['Quần Jean Slimfit Co Giãn Nam', 1, 520000]
+    ]
+  },
+  {
+    id: 'ORD-9027',
+    customer: 'Nguyễn Văn An',
+    phone: '0901234567',
+    address: '123 Lê Lợi, Phường Bến Nghé, Quận 1',
+    location: 'Hồ Chí Minh',
+    date: '2026-10-10',
+    total: 350000,
+    status: 'Đã giao',
+    items: [
+      ['Áo Khoác Bomber Da Bò Màu Nâu', 1, 350000]
+    ]
+  }
+];
+
 // Định dạng tiền tệ VNĐ
 function formatMoney(amount) {
   return new Intl.NumberFormat('vi-VN').format(amount || 0) + ' đ';
 }
 
-// ==========================================================================
-// 1. QUẢN LÝ GIỎ HÀNG (Local Storage)
-// ==========================================================================
+// Giỏ hàng tĩnh chỉ đọc
 function getCart() {
-  try {
-    return JSON.parse(localStorage.getItem('shopcloth_cart') || '[]');
-  } catch (_) {
-    return [];
-  }
+  return DEMO_CART_ITEMS;
 }
 
-function saveCart(cart) {
-  localStorage.setItem('shopcloth_cart', JSON.stringify(cart));
-  updateCartBadge();
-}
-
+// Cập nhật số badge giỏ hàng cố định
 function updateCartBadge() {
-  const cart = getCart();
-  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalCount = DEMO_CART_ITEMS.reduce((sum, item) => sum + item.quantity, 0);
   document.querySelectorAll('.cart-badge, #cartCountBadge').forEach(el => {
-    el.textContent = totalCount > 99 ? '99+' : totalCount;
+    el.textContent = totalCount;
     el.style.display = 'inline-flex';
   });
 }
 
-// Cập nhật hình đại diện khách hàng đã đăng nhập trên Navbar (nằm bên trái nút 3 gạch)
+// Avatar người dùng trên Navbar (Luôn hiển thị trạng thái đã đăng nhập của Nguyễn Văn A)
 function updateUserNavbarAvatar() {
-  let currentUser = null;
-  try {
-    currentUser = JSON.parse(localStorage.getItem('shopcloth_current_user') || 'null');
-  } catch (_) {}
-
-  // Cập nhật link nút Home
-  const homeBtns = document.querySelectorAll('.nav-home-btn, .navbar a[href="index.html"], .navbar a[href="logged-index.html"]');
-  homeBtns.forEach(link => {
-    if (currentUser && currentUser.name) {
-      link.setAttribute('href', 'logged-index.html');
-    } else {
-      link.setAttribute('href', 'index.html');
-    }
+  const userSlots = document.querySelectorAll('#navUserSlot');
+  userSlots.forEach(slot => {
+    slot.innerHTML = `
+      <a href="account.html" class="nav-user-pill" title="Tài khoản: Nguyễn Văn A">
+        <span class="nav-user-avatar">N</span>
+        <span class="nav-user-name">Nguyễn Văn A</span>
+      </a>
+    `;
   });
 
-  // Tìm tất cả các slot chứa thông tin người dùng (#navUserSlot hoặc fallback trong .navbar)
-  const userSlots = document.querySelectorAll('#navUserSlot');
-  if (userSlots.length > 0) {
-    userSlots.forEach(slot => {
-      if (currentUser && currentUser.name) {
-        const firstLetter = currentUser.name.trim().charAt(0).toUpperCase() || 'U';
-        const displayName = currentUser.name.trim();
-        slot.innerHTML = `
-          <a href="account.html" class="nav-user-pill" title="Tài khoản: ${displayName}">
-            <span class="nav-user-avatar">${firstLetter}</span>
-            <span class="nav-user-name">${displayName}</span>
-          </a>
-        `;
-      } else {
-        slot.innerHTML = `
-          <a href="account.html" class="nav-account-link" style="color: #cbd5e1; font-size: 14.5px; font-weight: 500; text-decoration: none; padding: 6px 12px;">Tài Khoản</a>
-        `;
-      }
-    });
-  }
+  // Cập nhật tất cả các link Home/Logo dẫn về logged-index.html
+  document.querySelectorAll('.nav-home-btn, .logo a').forEach(link => {
+    link.setAttribute('href', 'logged-index.html');
+  });
 }
 
+// Nút Thêm vào giỏ hàng: Vô hiệu hóa hoàn toàn, không có tác dụng
 function addToCart(productId, quantity = 1) {
-  let product = SHOP_PRODUCTS.find(p => p.id == productId);
-  if (!product) {
-    product = {
-      id: productId,
-      name: 'Áo Khoác Da Lộn Nam',
-      price: 1299000,
-      image: 'images/product-jacket-black.png'
-    };
-  }
-
-  const cart = getCart();
-  const existing = cart.find(item => item.id == productId);
-
-  if (existing) {
-    existing.quantity += quantity;
-  } else {
-    cart.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity: quantity
-    });
-  }
-
-  saveCart(cart);
-  alert(`Đã thêm "${product.name}" vào giỏ hàng thành công!`);
+  // Nút thêm vào giỏ hàng đã bị vô hiệu hóa
 }
 
-function updateCartQuantity(productId, quantity) {
-  let cart = getCart();
-  const item = cart.find(x => x.id == productId);
-  if (item) {
-    if (quantity <= 0) {
-      cart = cart.filter(x => x.id != productId);
-    } else {
-      item.quantity = quantity;
-    }
-    saveCart(cart);
-  }
-}
+// Nút tăng giảm số lượng
+window.changeItemQty = function (id, newQty) {
+  // Thao tác đổi số lượng
+};
 
-function removeCartItem(productId) {
-  let cart = getCart();
-  cart = cart.filter(x => x.id != productId);
-  saveCart(cart);
-}
+// Nút xóa sản phẩm khỏi giỏ
+window.deleteCartItem = function (id) {
+  // Thao tác xóa món khỏi giỏ
+};
 
 // ==========================================================================
-// 2. RENDER TRANG GIỎ HÀNG (cart.html)
+// 1. RENDER GIAO DIỆN GIỎ HÀNG (cart.html)
 // ==========================================================================
 function renderCartPage() {
   const container = document.getElementById('cartContentArea');
   if (!container) return;
 
   const cart = getCart();
-
-  if (cart.length === 0) {
-    container.innerHTML = `
-      <div class="empty-cart-box">
-        <div style="font-size: 54px; color: #38bdf8; margin-bottom: 12px;">🛒</div>
-        <h3>Giỏ hàng của bạn đang trống</h3>
-        <p>Hãy khám phá thêm các mẫu quần áo thời trang mới nhất tại ShopCloth nhé!</p>
-        <a href="index.html" class="btn-primary" style="display:inline-block; width:auto; padding:12px 28px; text-decoration:none;">
-          &larr; Khám Phá Sản Phẩm Ngay
-        </a>
-      </div>
-    `;
-    return;
-  }
-
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   container.innerHTML = `
     <div class="cart-layout">
       <!-- Bảng danh sách sản phẩm trong giỏ -->
       <div class="cart-box">
-        <h2>Giỏ Hàng Của Bạn (${cart.length} món)</h2>
+        <h2>Giỏ Hàng Của Bạn (${cart.length} món mẫu)</h2>
         <div style="overflow-x: auto;">
           <table class="cart-table">
             <thead>
@@ -263,14 +232,14 @@ function renderCartPage() {
                   <td style="color:#94a3b8;">${formatMoney(item.price)}</td>
                   <td style="text-align:center;">
                     <div class="qty-controller">
-                      <button class="btn-qty" onclick="changeItemQty(${item.id}, ${item.quantity - 1})">-</button>
+                      <button type="button" class="btn-qty" onclick="changeItemQty(${item.id}, ${item.quantity - 1})">-</button>
                       <input type="text" class="qty-input" value="${item.quantity}" readonly>
-                      <button class="btn-qty" onclick="changeItemQty(${item.id}, ${item.quantity + 1})">+</button>
+                      <button type="button" class="btn-qty" onclick="changeItemQty(${item.id}, ${item.quantity + 1})">+</button>
                     </div>
                   </td>
                   <td style="color:#38bdf8; font-weight:700;">${formatMoney(item.price * item.quantity)}</td>
                   <td style="text-align:right;">
-                    <button class="btn-remove-item" onclick="deleteCartItem(${item.id})" title="Xóa món này">&times;</button>
+                    <button type="button" class="btn-remove-item" onclick="deleteCartItem(${item.id})" title="Xóa món này">&times;</button>
                   </td>
                 </tr>
               `).join('')}
@@ -278,7 +247,7 @@ function renderCartPage() {
           </table>
         </div>
         <div style="margin-top:20px;">
-          <a href="index.html" class="back-link">&larr; Tiếp tục chọn thêm sản phẩm</a>
+          <a href="logged-index.html" class="back-link">&larr; Tiếp tục chọn thêm sản phẩm</a>
         </div>
       </div>
 
@@ -310,20 +279,8 @@ function renderCartPage() {
   `;
 }
 
-window.changeItemQty = function (id, newQty) {
-  updateCartQuantity(id, newQty);
-  renderCartPage();
-};
-
-window.deleteCartItem = function (id) {
-  if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) {
-    removeCartItem(id);
-    renderCartPage();
-  }
-};
-
 // ==========================================================================
-// 3. XỬ LÝ ĐẶT HÀNG (checkout.html) & ĐỒNG BỘ VÀO adminOrders
+// 2. GIAO DIỆN ĐẶT HÀNG (checkout.html)
 // ==========================================================================
 function setupCheckoutPage() {
   const checkoutSummary = document.getElementById('checkoutSummaryItems');
@@ -331,13 +288,6 @@ function setupCheckoutPage() {
   if (!checkoutSummary || !checkoutForm) return;
 
   const cart = getCart();
-
-  if (cart.length === 0) {
-    alert('Giỏ hàng của bạn đang trống! Vui lòng chọn sản phẩm trước khi thanh toán.');
-    window.location.href = 'index.html';
-    return;
-  }
-
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   checkoutSummary.innerHTML = `
@@ -362,240 +312,72 @@ function setupCheckoutPage() {
     </div>
   `;
 
-  // Xử lý gửi đơn hàng (Bỏ hết ràng buộc, bấm là đặt được ngay)
+  // Submit form đặt hàng: Chỉ chuyển hướng sang trang chi tiết đơn hàng demo, không lưu DB
   checkoutForm.addEventListener('submit', function (e) {
     e.preventDefault();
-
-    const name = document.getElementById('orderCustomerName').value.trim() || 'Khách Mua Hàng';
-    const phone = document.getElementById('orderCustomerPhone').value.trim() || '0901234567';
-    const address = document.getElementById('orderCustomerAddress').value.trim() || '123 Đường Mẫu';
-    const city = document.getElementById('orderCustomerCity').value.trim() || 'Hồ Chí Minh';
-    const notes = document.getElementById('orderCustomerNotes')?.value.trim() || '';
-
-    // Tạo mã đơn hàng mới dạng ORD-XXXX
-    const newOrderId = 'ORD-' + Math.floor(9030 + Math.random() * 900);
-    const today = new Date().toISOString().split('T')[0];
-
-    // Chuyển cart thành format items của adminOrders: [ [name, qty, price], ... ]
-    const orderItems = cart.map(item => [item.name, item.quantity, item.price]);
-
-    const newOrder = {
-      id: newOrderId,
-      customer: name,
-      phone: phone,
-      address: address,
-      location: city,
-      date: today,
-      total: subtotal,
-      status: 'Chưa xác nhận', // Đơn mới đặt
-      items: orderItems,
-      notes: notes
-    };
-
-    // ĐỒNG BỘ TRỰC TIẾP VÀO adminOrders TRONG LOCALSTORAGE!
-    try {
-      const adminOrders = JSON.parse(localStorage.getItem('adminOrders') || '[]');
-      adminOrders.unshift(newOrder); // Đẩy lên đầu danh sách
-      localStorage.setItem('adminOrders', JSON.stringify(adminOrders));
-    } catch (_) { }
-
-    // Lưu vào lịch sử đơn hàng của tài khoản khách
-    try {
-      const userOrders = JSON.parse(localStorage.getItem('shopcloth_user_orders') || '[]');
-      userOrders.unshift(newOrder);
-      localStorage.setItem('shopcloth_user_orders', JSON.stringify(userOrders));
-    } catch (_) { }
-
-    // Xóa giỏ hàng
-    localStorage.removeItem('shopcloth_cart');
-    updateCartBadge();
-
-    alert(`🎉 Chúc mừng bạn đã đặt hàng thành công! Mã đơn của bạn là #${newOrderId}`);
-    window.location.href = `order-detail.html?id=${encodeURIComponent(newOrderId)}`;
+    alert('🎉 Xác nhận đặt hàng thành công! Đang chuyển đến trang chi tiết đơn hàng...');
+    window.location.href = 'order-detail.html?id=ORD-9021';
   });
 }
 
 // ==========================================================================
-// 4. QUẢN LÝ TÀI KHOẢN KHÁCH HÀNG (account.html)
-// "Bỏ hết các ràng buộc khi đăng ký đăng nhập"
+// 3. GIAO DIỆN TÀI KHOẢN (account.html)
 // ==========================================================================
 function setupAccountPage() {
-  const loginForm = document.getElementById('userLoginForm');
-  const registerForm = document.getElementById('userRegisterForm');
   const accountDashboard = document.getElementById('accountDashboardView');
   const authFormsWrap = document.getElementById('authFormsWrap');
-
   if (!accountDashboard || !authFormsWrap) return;
 
-  function renderAccountView() {
-    const currentUser = JSON.parse(localStorage.getItem('shopcloth_current_user') || 'null');
+  // Hiển thị trực tiếp giao diện tài khoản mẫu để giáo viên xem
+  authFormsWrap.style.display = 'none';
+  accountDashboard.style.display = 'block';
 
-    if (currentUser) {
-      authFormsWrap.style.display = 'none';
-      accountDashboard.style.display = 'block';
+  const historyTbody = document.getElementById('userOrderHistoryBody');
+  if (historyTbody) {
+    historyTbody.innerHTML = DEMO_CUSTOMER_ORDERS.map(o => {
+      let statusBadge = `<span class="order-badge-status status-pending">${o.status}</span>`;
+      if (o.status === 'Đã giao') statusBadge = `<span class="order-badge-status status-delivered">${o.status}</span>`;
+      else if (o.status === 'Đã xác nhận') statusBadge = `<span class="order-badge-status status-confirmed">${o.status}</span>`;
+      else if (o.status === 'Hủy đơn') statusBadge = `<span class="order-badge-status status-cancelled">${o.status}</span>`;
 
-      document.getElementById('accUserName').textContent = currentUser.name || 'Khách hàng';
-      document.getElementById('accUserEmail').textContent = currentUser.email || 'user@gmail.com';
-      document.getElementById('accUserPhone').textContent = currentUser.phone || 'Chưa cập nhật';
-
-      // Lấy lịch sử đơn hàng từ cả shopcloth_user_orders và adminOrders để đảm bảo luôn hiển thị đầy đủ
-      let userSavedOrders = [];
-      try {
-        userSavedOrders = JSON.parse(localStorage.getItem('shopcloth_user_orders') || '[]');
-      } catch (_) {}
-
-      let allOrders = [];
-      try {
-        allOrders = JSON.parse(localStorage.getItem('adminOrders') || '[]');
-      } catch (_) {}
-
-      // Gộp các đơn hàng của khách
-      const myOrdersMap = new Map();
-      userSavedOrders.forEach(o => myOrdersMap.set(o.id, o));
-      allOrders.forEach(o => {
-        if (!myOrdersMap.has(o.id)) {
-          if (
-            (currentUser.name && o.customer && o.customer.toLowerCase().includes(currentUser.name.toLowerCase())) ||
-            (currentUser.phone && o.phone && o.phone.includes(currentUser.phone))
-          ) {
-            myOrdersMap.set(o.id, o);
-          }
-        }
-      });
-
-      const myOrders = Array.from(myOrdersMap.values());
-
-      const historyTbody = document.getElementById('userOrderHistoryBody');
-      if (historyTbody) {
-        if (myOrders.length === 0) {
-          historyTbody.innerHTML = `
-            <tr>
-              <td colspan="5" style="text-align:center; padding:24px; color:#94a3b8;">
-                Bạn chưa có đơn đặt hàng nào gần đây.
-              </td>
-            </tr>
-          `;
-        } else {
-          historyTbody.innerHTML = myOrders.map(o => {
-            let statusBadge = `<span class="order-badge-status status-pending">${o.status}</span>`;
-            if (o.status === 'Đã giao') statusBadge = `<span class="order-badge-status status-delivered">${o.status}</span>`;
-            else if (o.status === 'Đã xác nhận') statusBadge = `<span class="order-badge-status status-confirmed">${o.status}</span>`;
-            else if (o.status === 'Hủy đơn') statusBadge = `<span class="order-badge-status status-cancelled">${o.status}</span>`;
-
-            return `
-              <tr>
-                <td><strong>#${o.id}</strong></td>
-                <td>${new Date(o.date).toLocaleDateString('vi-VN')}</td>
-                <td style="color:#38bdf8; font-weight:700;">${formatMoney(o.total)}</td>
-                <td>${statusBadge}</td>
-                <td>
-                  <a href="order-detail.html?id=${encodeURIComponent(o.id)}" class="btn-detail" style="padding:4px 10px; font-size:12px; display:inline-block;">
-                    Xem chi tiết
-                  </a>
-                </td>
-              </tr>
-            `;
-          }).join('');
-        }
-      }
-    } else {
-      authFormsWrap.style.display = 'block';
-      accountDashboard.style.display = 'none';
-    }
+      return `
+        <tr>
+          <td><strong>#${o.id}</strong></td>
+          <td>${new Date(o.date).toLocaleDateString('vi-VN')}</td>
+          <td style="color:#38bdf8; font-weight:700;">${formatMoney(o.total)}</td>
+          <td>${statusBadge}</td>
+          <td>
+            <a href="order-detail.html?id=${encodeURIComponent(o.id)}" class="btn-detail" style="padding:4px 10px; font-size:12px; display:inline-block;">
+              Xem chi tiết
+            </a>
+          </td>
+        </tr>
+      `;
+    }).join('');
   }
 
-  // Đăng nhập (Bỏ hết ràng buộc)
-  if (loginForm) {
-    loginForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const email = document.getElementById('loginUserEmail').value.trim() || 'an.nguyen@gmail.com';
-      const name = email.split('@')[0];
-
-      localStorage.setItem('shopcloth_current_user', JSON.stringify({
-        name: name.toUpperCase(),
-        email: email,
-        phone: '0901234567'
-      }));
-
-      alert('Đăng nhập thành công!');
-      updateUserNavbarAvatar();
-      renderAccountView();
-    });
-  }
-
-  // Đăng ký (Bỏ hết ràng buộc)
-  if (registerForm) {
-    registerForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const name = document.getElementById('regName').value.trim() || 'Khách hàng mới';
-      const email = document.getElementById('regEmail').value.trim() || 'user@example.com';
-      const phone = document.getElementById('regPhone').value.trim() || '0987654321';
-
-      localStorage.setItem('shopcloth_current_user', JSON.stringify({
-        name: name,
-        email: email,
-        phone: phone
-      }));
-
-      alert('Đăng ký tài khoản thành công!');
-      updateUserNavbarAvatar();
-      renderAccountView();
-    });
-  }
-
-  // Đăng xuất
   const btnLogout = document.getElementById('btnUserLogout');
   if (btnLogout) {
     btnLogout.addEventListener('click', function () {
-      localStorage.removeItem('shopcloth_current_user');
-      updateUserNavbarAvatar();
-      renderAccountView();
+      window.location.href = 'log-in.html';
     });
   }
-
-  renderAccountView();
 }
 
 // ==========================================================================
-// 5. TRANG CHI TIẾT ĐƠN HÀNG PHÍA KHÁCH HÀNG (order-detail.html)
+// 4. TRANG CHI TIẾT ĐƠN HÀNG PHÍA KHÁCH HÀNG (order-detail.html)
 // ==========================================================================
 function setupCustomerOrderDetail() {
   const container = document.getElementById('customerOrderDetailBox');
   if (!container) return;
 
-  const id = new URLSearchParams(window.location.search).get('id');
-  let orders = [];
-  try {
-    orders = JSON.parse(localStorage.getItem('adminOrders') || '[]');
-  } catch (_) { }
+  const id = new URLSearchParams(window.location.search).get('id') || 'ORD-9021';
+  let order = DEMO_CUSTOMER_ORDERS.find(x => x.id === id) || DEMO_CUSTOMER_ORDERS[0];
 
-  const order = orders.find(x => x.id === id);
-
-  if (!order) {
-    container.innerHTML = `
-      <div style="text-align:center; padding:40px;">
-        <h2 style="color:#ef4444; margin-bottom:12px;">Không tìm thấy đơn hàng</h2>
-        <p style="color:#94a3b8; margin-bottom:20px;">Mã đơn hàng "${id || 'N/A'}" không có trong hệ thống.</p>
-        <a href="index.html" class="btn-primary" style="display:inline-block; width:auto; padding:10px 24px; text-decoration:none;">Về trang chủ</a>
-      </div>
-    `;
-    return;
-  }
-
-  let statusBadge = `<span class="order-badge-status status-pending">Chờ xác nhận</span>`;
+  let statusBadge = `<span class="order-badge-status status-pending">${order.status}</span>`;
   if (order.status === 'Đã giao') statusBadge = `<span class="order-badge-status status-delivered">Đã giao thành công</span>`;
   else if (order.status === 'Đã xác nhận') statusBadge = `<span class="order-badge-status status-confirmed">Đã xác nhận & đang vận chuyển</span>`;
   else if (order.status === 'Hủy đơn') statusBadge = `<span class="order-badge-status status-cancelled">Đã hủy</span>`;
-
-  // Hàm tìm ảnh sản phẩm theo tên (đồng bộ với SHOP_PRODUCTS)
-  function findProductImg(itemName) {
-    const nameLower = itemName.toLowerCase();
-    let found = SHOP_PRODUCTS.find(p => p.name.toLowerCase() === nameLower);
-    if (found) return found.image;
-    found = SHOP_PRODUCTS.find(p => nameLower.includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(nameLower));
-    if (found) return found.image;
-    return null;
-  }
 
   container.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155; padding-bottom:16px; margin-bottom:20px;">
@@ -629,24 +411,16 @@ function setupCustomerOrderDetail() {
           </tr>
         </thead>
         <tbody>
-          ${order.items.map(item => {
-    const img = findProductImg(item[0]);
-    const imgHtml = img
-      ? `<img src="${img}" alt="${item[0]}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; border:1px solid #334155; margin-right:10px; vertical-align:middle;" onerror="this.style.display='none'">`
-      : '';
-    return `
+          ${order.items.map(item => `
             <tr>
               <td>
-                <div style="display:flex; align-items:center;">
-                  ${imgHtml}
-                  <strong>${item[0]}</strong>
-                </div>
+                <strong>${item[0]}</strong>
               </td>
               <td style="text-align:center;">x${item[1]}</td>
               <td style="text-align:right; color:#94a3b8;">${formatMoney(item[2])}</td>
               <td style="text-align:right; color:#38bdf8; font-weight:700;">${formatMoney(item[1] * item[2])}</td>
             </tr>
-          `}).join('')}
+          `).join('')}
         </tbody>
       </table>
     </div>
@@ -657,8 +431,8 @@ function setupCustomerOrderDetail() {
     </div>
 
     <div style="margin-top:30px; display:flex; gap:16px;">
-      <a href="index.html" class="btn-primary" style="text-decoration:none; text-align:center; flex:1;">&larr; Tiếp tục mua sắm</a>
-      <a href="account.html" class="btn-secondary-link" style="margin-top:0; flex:1;">Xem lịch sử đơn hàng</a>
+      <a href="logged-index.html" class="btn-primary" style="text-decoration:none; text-align:center; flex:1;">&larr; Tiếp tục mua sắm</a>
+      <a href="history.html" class="btn-secondary-link" style="margin-top:0; flex:1;">Xem lịch sử đơn hàng</a>
     </div>
   `;
 }
@@ -691,14 +465,12 @@ document.addEventListener('DOMContentLoaded', () => {
   setupAccountPage();
   setupCustomerOrderDetail();
 
-  // Nút thêm vào giỏ hàng tại product-detail.html
+  // Nút thêm vào giỏ hàng tại product-detail.html: Vô hiệu hóa
   const btnAddCart = document.getElementById('btnAddCart');
   if (btnAddCart) {
-    btnAddCart.addEventListener('click', () => {
-      const qtyInput = document.getElementById('quantity');
-      const qty = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
-      const urlId = new URLSearchParams(window.location.search).get('id') || 1;
-      addToCart(urlId, qty);
+    btnAddCart.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Nút bị vô hiệu hóa
     });
   }
 
@@ -741,7 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="price">${formatMoney(p.price)}</p>
           <div class="card-actions">
             <a href="product-detail.html?id=${p.id}" class="btn-detail">Chi Tiết</a>
-            <button type="button" class="btn-quick-add" onclick="addToCart(${p.id}, 1)" title="Thêm ngay vào giỏ">
+            <button type="button" class="btn-quick-add" onclick="event.preventDefault()" title="Thêm ngay vào giỏ">
               🛒 Thêm Giỏ
             </button>
           </div>
@@ -753,56 +525,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderUserPagination(totalPages) {
       if (!paginationContainer) return;
-      if (totalPages <= 1) {
-        paginationContainer.innerHTML = '';
-        return;
-      }
 
       let html = '';
-      if (currentUserPage > 1) {
-        html += `<button onclick="changeUserPage(${currentUserPage - 1})">&laquo; Trang trước</button>`;
-      }
-
-      for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="${i === currentUserPage ? 'active' : ''}" onclick="changeUserPage(${i})">${i}</button>`;
-      }
-
-      if (currentUserPage < totalPages) {
-        html += `<button onclick="changeUserPage(${currentUserPage + 1})">Trang sau &raquo;</button>`;
-      }
+      html += `<button type="button" onclick="event.preventDefault()">&laquo; Trang trước</button>`;
+      html += `<button type="button" class="active" onclick="event.preventDefault()">1</button>`;
+      html += `<button type="button" onclick="event.preventDefault()">2</button>`;
+      html += `<button type="button" onclick="event.preventDefault()">Trang sau &raquo;</button>`;
 
       paginationContainer.innerHTML = html;
     }
 
     window.changeUserPage = function (page) {
-      currentUserPage = page;
-      renderUserProductList();
-      window.scrollTo({ top: productGrid.offsetTop - 80, behavior: 'smooth' });
+      // Vô hiệu hóa nút chuyển trang sản phẩm
     };
 
     function filterStoreProducts() {
-      const keyword = (searchInput ? searchInput.value.trim().toLowerCase() : '');
-      const cat = (catFilter ? catFilter.value : 'all');
-      const minP = (minPriceInput && minPriceInput.value) ? parseFloat(minPriceInput.value) : 0;
-      const maxP = (maxPriceInput && maxPriceInput.value) ? parseFloat(maxPriceInput.value) : Infinity;
-
-      currentFilteredList = SHOP_PRODUCTS.filter(p => {
-        const matchKeyword = !keyword || p.name.toLowerCase().includes(keyword);
-        const matchCat = (cat === 'all') || (p.category === cat);
-        const matchPrice = p.price >= minP && p.price <= maxP;
-        return matchKeyword && matchCat && matchPrice;
-      });
-
-      currentUserPage = 1;
-      renderUserProductList();
+      // Giữ nguyên giao diện, không thực hiện tìm kiếm / lọc dữ liệu
     }
 
-    if (searchInput) searchInput.addEventListener('input', filterStoreProducts);
-    if (catFilter) catFilter.addEventListener('change', filterStoreProducts);
-    if (btnAdvSearch) btnAdvSearch.addEventListener('click', filterStoreProducts);
+    if (btnAdvSearch) {
+      btnAdvSearch.addEventListener('click', (e) => {
+        e.preventDefault();
+      });
+    }
 
-    // Initial render 6 sản phẩm trang 1
     renderUserProductList();
   }
 });
-

@@ -558,7 +558,7 @@
       renderUserTable();
     };
 
-    // Toggle Lock / Unlock Functionality
+    // Toggle Lock / Unlock Functionality (Chỉ mô phỏng giao diện, không sửa dữ liệu)
     function toggleUserLock(userId) {
       const user = usersData.find(u => u.id === userId);
       if (!user) return;
@@ -575,11 +575,9 @@
         confirmText: isLocking ? 'Khóa ngay' : 'Mở khóa',
         confirmClass: isLocking ? 'btn-danger' : 'btn-success',
         onConfirm: () => {
-          user.status = isLocking ? 'locked' : 'active';
-          handleUserFilter();
           showToast(
             isLocking 
-              ? `Đã khóa tài khoản ${user.name} thành công!` 
+              ? `Đã khóa tài khoản ${user.name}!` 
               : `Đã mở khóa cho tài khoản ${user.name}!`,
             isLocking ? 'warning' : 'success'
           );
@@ -587,7 +585,7 @@
       });
     }
 
-    // Delete User
+    // Delete User (Chỉ mô phỏng giao diện, không sửa dữ liệu)
     function deleteUser(userId) {
       const user = usersData.find(u => u.id === userId);
       if (!user) return;
@@ -598,32 +596,15 @@
         confirmText: 'Xóa vĩnh viễn',
         confirmClass: 'btn-danger',
         onConfirm: () => {
-          usersData = usersData.filter(u => u.id !== userId);
-          handleUserFilter();
-          showToast(`Đã xóa tài khoản ${user.name} thành công!`, 'danger');
+          showToast(`Đã xóa tài khoản ${user.name}!`, 'danger');
         }
       });
     }
 
     // Search & Filter: Chỉ tìm sau khi bấm nút "Áp dụng lọc" hoặc nhấn Enter
     function applyUserFilter() {
-      const search = normalizeText(document.getElementById('userSearchInput').value);
-      const role = document.getElementById('roleFilter').value;
-      const status = document.getElementById('statusFilter').value;
-
-      filteredUsers = usersData.filter(user => {
-        const matchSearch = !search || 
-          normalizeText(user.name).includes(search) || 
-          normalizeText(user.email).includes(search) || 
-          normalizeText(user.phone).includes(search) ||
-          normalizeText(user.id).includes(search);
-
-        const matchRole = role === 'all' || user.role === role;
-        const matchStatus = status === 'all' || user.status === status;
-
-        return matchSearch && matchRole && matchStatus;
-      });
-
+      // Giữ ô tìm kiếm nhưng không lọc/tìm kiếm dữ liệu
+      filteredUsers = [...usersData];
       currentUserPage = 1;
       renderUserTable();
     }
@@ -683,53 +664,14 @@
       e.preventDefault();
       const editId = document.getElementById('editUserId').value;
       const name = document.getElementById('userName').value.trim();
-      const email = document.getElementById('userEmail').value.trim();
-      const phone = document.getElementById('userPhone').value.trim();
-      const role = document.getElementById('userRole').value;
-      const status = document.getElementById('userStatus').value;
-      const note = document.getElementById('userNote').value.trim();
 
       if (editId) {
-        // Edit Mode
-        const user = usersData.find(u => u.id === editId);
-        if (user) {
-          user.name = name;
-          user.email = email;
-          user.phone = phone;
-          user.role = role;
-          user.status = status;
-          user.note = note;
-          showToast(`Đã cập nhật thông tin cho người dùng #${editId}!`, 'success');
-        }
+        showToast(`Đã lưu thông tin người dùng #${editId}!`, 'success');
       } else {
-        // Add Mode
-        const newId = 'USR-' + (100 + usersData.length + 1);
-        const randomGradients = [
-          'linear-gradient(135deg, #06b6d4, #3b82f6)',
-          'linear-gradient(135deg, #ec4899, #8b5cf6)',
-          'linear-gradient(135deg, #10b981, #14b8a6)',
-          'linear-gradient(135deg, #f97316, #ef4444)'
-        ];
-        const avatarBg = randomGradients[Math.floor(Math.random() * randomGradients.length)];
-        const today = new Date();
-        const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-
-        usersData.unshift({
-          id: newId,
-          name,
-          email,
-          phone,
-          role,
-          status,
-          createdDate: dateStr,
-          avatarBg,
-          note
-        });
         showToast(`Đã thêm thành công người dùng mới ${name}!`, 'success');
       }
 
       closeUserModal();
-      handleUserFilter();
     }
 
     

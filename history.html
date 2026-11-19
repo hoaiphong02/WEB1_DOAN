@@ -51,7 +51,7 @@
         <a href="history.html" class="nav-item-btn active">📦 Lịch sử mua hàng</a>
         <a href="cart.html" class="nav-item-btn">🛒 Giỏ hàng</a>
         <hr class="sidebar-divider">
-        <a href="index.html" class="nav-item-btn" style="color: #dc2626;">🚪 Đăng xuất</a>
+        <a href="log-in.html" class="nav-item-btn" style="color: #dc2626;">🚪 Đăng xuất</a>
       </aside>
 
       <main class="account-content-card">
@@ -69,23 +69,8 @@
       const container = document.getElementById('dynamicHistoryList');
       if (!container) return;
 
-      let orders = [];
-      try {
-        orders = JSON.parse(localStorage.getItem('shopcloth_user_orders') || '[]');
-        if (orders.length === 0) {
-          orders = JSON.parse(localStorage.getItem('adminOrders') || '[]');
-        }
-      } catch (_) {}
-
-      if (orders.length === 0) {
-        container.innerHTML = `
-          <div style="text-align:center; padding:40px; color:#94a3b8;">
-            <p>Bạn chưa có đơn đặt hàng nào.</p>
-            <a href="index.html" class="btn-primary" style="display:inline-block; width:auto; padding:10px 20px; margin-top:14px; text-decoration:none;">Mua sắm ngay</a>
-          </div>
-        `;
-        return;
-      }
+      // Sử dụng danh sách đơn hàng tĩnh demo để hiển thị giao diện thuần túy
+      const orders = DEMO_CUSTOMER_ORDERS;
 
       container.innerHTML = orders.map(o => {
         let badgeClass = 'status-orange';

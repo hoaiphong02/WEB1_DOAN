@@ -41,15 +41,7 @@
   </div>
 
   <script>
-    document.getElementById('loginFormDirect').addEventListener('submit', function(e) {
-      const contact = document.getElementById('loginContactInput').value.trim() || 'nguyenvanan@gmail.com';
-      const name = contact.includes('@') ? contact.split('@')[0].toUpperCase() : 'NGUYỄN VĂN A';
-      localStorage.setItem('shopcloth_current_user', JSON.stringify({
-        name: name,
-        email: contact.includes('@') ? contact : contact + '@gmail.com',
-        phone: contact.includes('@') ? '0901234567' : contact
-      }));
-    });
+    // Bỏ lưu trữ dữ liệu, submit form trực tiếp chuyển sang giao diện logged-index.html
   </script>
 </body>
 </html>

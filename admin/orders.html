@@ -367,22 +367,9 @@
       return 'badge badge-gray';
     }
 
-    // Render Table Đơn Hàng
+    // Render Table Đơn Hàng (Giữ nguyên giao diện tìm kiếm nhưng không lọc/tìm kiếm dữ liệu)
     function render() {
-      const search = normalizeText(document.querySelector('#search').value);
-      const status = document.querySelector('#statusFilter').value;
-      const fromDate = document.querySelector('#fromDate').value;
-      const toDate = document.querySelector('#toDate').value;
-      const locInput = document.querySelector('#location');
-      const loc = locInput ? normalizeText(locInput.value) : '';
-
-      filteredOrders = orders.filter(o => {
-        const matchSearch = normalizeText(o.id).includes(search) || normalizeText(o.customer).includes(search);
-        const matchStatus = status === 'all' || o.status === status;
-        const matchDate = (!fromDate || o.date >= fromDate) && (!toDate || o.date <= toDate);
-        const matchLoc = !loc || loc === 'all' || normalizeText(o.location).includes(loc);
-        return matchSearch && matchStatus && matchDate && matchLoc;
-      });
+      filteredOrders = [...orders];
 
       document.querySelector('#resultCount').textContent = `${filteredOrders.length} đơn hàng`;
 
@@ -432,39 +419,25 @@
 
     function renderPaginationControls(totalPages) {
       const paginationDiv = document.querySelector('#paginationControls');
-      let html = '';
-      if (totalPages > 1) {
-        html += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
-        for (let i = 1; i <= totalPages; i++) {
-          html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-        }
-        html += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>&raquo;</button>`;
-      }
-      paginationDiv.innerHTML = html;
+      paginationDiv.innerHTML = `
+        <button class="page-btn" onclick="event.preventDefault()" disabled>&laquo;</button>
+        <button class="page-btn active" onclick="event.preventDefault()">1</button>
+        <button class="page-btn" onclick="event.preventDefault()">2</button>
+        <button class="page-btn" onclick="event.preventDefault()">&raquo;</button>
+      `;
     }
 
     window.changePage = function(page) {
-      const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-      if (page >= 1 && page <= totalPages) {
-        currentPage = page;
-        render();
-      }
+      // Vô hiệu hóa nút chuyển trang ở bảng danh sách đơn hàng
     };
 
     function attachEventListeners() {
-      // Thay đổi trạng thái tùy ý, không ràng buộc
+      // Thay đổi trạng thái: Chỉ mô phỏng giao diện, không sửa đổi dữ liệu gốc
       document.querySelectorAll('select[data-id]').forEach(select => {
         select.onchange = (e) => {
           const orderId = e.target.dataset.id;
           const newStatus = e.target.value;
-          const order = orders.find(x => x.id === orderId);
-
-          if (order) {
-            order.status = newStatus;
-            saveAdminOrders(orders);
-            renderStats();
-            showToast(`Đã cập nhật trạng thái đơn #${orderId} thành "${newStatus}"`, 'success');
-          }
+          showToast(`Trạng thái đơn #${orderId}: "${newStatus}"`, 'info');
         };
       });
     }

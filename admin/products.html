@@ -338,13 +338,19 @@
   <script src="../js/products.js"></script>
   <script>
     // Mock Product Data
-    let productsData = window.loadShopProducts().map(product => ({
-      ...product,
-      images: [product.image.startsWith('data:') ? product.image : `../${product.image}`],
-      desc: product.description,
-      sold: product.id === 'CLT-102' || product.id === 'CLT-104',
-      status: product.stock === 0 ? 'out_of_stock' : 'active'
-    }));
+    let productsData = window.loadShopProducts().map(product => {
+      let imgPath = product.image;
+      if (imgPath && !imgPath.startsWith('data:') && !imgPath.startsWith('http') && !imgPath.startsWith('../')) {
+        imgPath = `../${imgPath}`;
+      }
+      return {
+        ...product,
+        images: [imgPath],
+        desc: product.description,
+        sold: product.id === 'CLT-102' || product.id === 'CLT-104',
+        status: product.stock === 0 ? 'out_of_stock' : 'active'
+      };
+    });
 
     let filteredProducts = [...productsData];
     let currentProductPage = 1;
@@ -352,16 +358,7 @@
     let currentUploadedImages = []; // Array of image URLs or base64 data for modal
 
     function saveProductsForStore() {
-      window.saveShopProducts(productsData.map(product => ({
-        id: product.id,
-        name: product.name,
-        category: product.category,
-        price: product.price,
-        oldPrice: product.oldPrice,
-        stock: product.stock,
-        image: (product.images?.[0] || '../images/product-jacket-black.png').replace(/^\.\.\//, ''),
-        description: product.desc || ''
-      })));
+      // Giao diện mô phỏng thuần túy, không ghi vào cơ sở dữ liệu
     }
 
     // Render Table
@@ -471,55 +468,42 @@
       const paginationDiv = document.getElementById('productPaginationControls');
       if (!paginationDiv) return;
 
-      let html = '';
-      if (totalPages > 1) {
-        html += `<button class="page-btn" onclick="changeProductPage(${currentProductPage - 1})" ${currentProductPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
-        for (let i = 1; i <= totalPages; i++) {
-          html += `<button class="page-btn ${i === currentProductPage ? 'active' : ''}" onclick="changeProductPage(${i})">${i}</button>`;
-        }
-        html += `<button class="page-btn" onclick="changeProductPage(${currentProductPage + 1})" ${currentProductPage === totalPages ? 'disabled' : ''}>&raquo;</button>`;
-      } else {
-        html = `<button class="page-btn active">1</button>`;
-      }
-
-      paginationDiv.innerHTML = html;
+      paginationDiv.innerHTML = `
+        <button class="page-btn" onclick="event.preventDefault()" disabled>&laquo;</button>
+        <button class="page-btn active" onclick="event.preventDefault()">1</button>
+        <button class="page-btn" onclick="event.preventDefault()">2</button>
+        <button class="page-btn" onclick="event.preventDefault()">&raquo;</button>
+      `;
     }
 
     window.changeProductPage = function(page) {
-      currentProductPage = page;
-      renderProductTable();
+      // Vô hiệu hóa nút chuyển trang sản phẩm trong admin
     };
 
-    // Delete Product
+    // Delete Product (Chỉ mô phỏng giao diện, không sửa đổi dữ liệu)
     function deleteProduct(productId) {
       const p = productsData.find(x => x.id === productId);
       if (!p) return;
 
-        if (p.sold) {
-          showConfirm({
-            title: 'Ẩn sản phẩm đã từng bán',
-            message: `Sản phẩm <strong>${p.name}</strong> đã từng được bán. Theo yêu cầu bài, sản phẩm sẽ được chuyển sang trạng thái <strong>Tạm ẩn</strong> thay vì xóa.`,
-            confirmText: 'Ẩn sản phẩm',
-            confirmClass: 'btn-warning',
-            onConfirm: () => {
-              p.status = 'draft';
-            saveProductsForStore();
-              handleProductFilter();
-              showToast(`Đã ẩn sản phẩm ${p.name}.`, 'warning');
-            }
-          });
-          return;
-        }
-
+      if (p.sold) {
         showConfirm({
+          title: 'Ẩn sản phẩm đã từng bán',
+          message: `Sản phẩm <strong>${p.name}</strong> đã từng được bán. Theo yêu cầu bài, sản phẩm sẽ được chuyển sang trạng thái <strong>Tạm ẩn</strong> thay vì xóa.`,
+          confirmText: 'Ẩn sản phẩm',
+          confirmClass: 'btn-warning',
+          onConfirm: () => {
+            showToast(`Đã ẩn sản phẩm ${p.name}.`, 'warning');
+          }
+        });
+        return;
+      }
+
+      showConfirm({
         title: 'Xóa sản phẩm',
         message: `Bạn có chắc chắn muốn xóa sản phẩm <strong>${p.name}</strong> (${p.id})?`,
         confirmText: 'Xóa sản phẩm',
         confirmClass: 'btn-danger',
         onConfirm: () => {
-          productsData = productsData.filter(x => x.id !== productId);
-          saveProductsForStore();
-          handleProductFilter();
           showToast(`Đã xóa sản phẩm ${p.name}!`, 'danger');
         }
       });
@@ -527,33 +511,16 @@
 
     // Filters & Search
     function handleProductSearch() {
-      handleProductFilter();
+      // Giữ ô tìm kiếm nhưng không lọc/tìm kiếm dữ liệu
     }
 
     function applyProductFilter() {
-      handleProductFilter();
+      // Giữ bộ lọc nhưng không lọc/tìm kiếm dữ liệu
     }
 
     function handleProductFilter() {
-      const search = normalizeText(document.getElementById('productSearchInput').value);
-      const category = document.getElementById('categoryFilter').value;
-      const stock = document.getElementById('stockFilter').value;
-
-      filteredProducts = productsData.filter(p => {
-        const matchSearch = !search ||
-          normalizeText(p.name).includes(search) ||
-          normalizeText(p.id).includes(search);
-
-        const matchCategory = category === 'all' || p.category === category;
-
-        let matchStock = true;
-        if (stock === 'in_stock') matchStock = p.stock > 10;
-        else if (stock === 'low_stock') matchStock = p.stock > 0 && p.stock <= 10;
-        else if (stock === 'out_of_stock') matchStock = p.stock === 0;
-
-        return matchSearch && matchCategory && matchStock;
-      });
-
+      // Giữ nguyên toàn bộ danh sách sản phẩm hiển thị cố định
+      filteredProducts = [...productsData];
       currentProductPage = 1;
       renderProductTable();
     }
@@ -743,14 +710,6 @@
       e.preventDefault();
       const editId = document.getElementById('editProductId').value;
       const name = document.getElementById('productName').value.trim();
-      const sku = document.getElementById('productSku').value.trim();
-      const category = document.getElementById('productCategory').value;
-      const price = parseFloat(document.getElementById('productPrice').value) || 0;
-      const oldPriceEl = document.getElementById('productOldPrice');
-      const oldPrice = oldPriceEl ? (parseFloat(oldPriceEl.value) || 0) : 0;
-      const stock = parseInt(document.getElementById('productStock').value, 10) || 0;
-      const status = document.getElementById('productStatus').value;
-      const desc = document.getElementById('productDesc').value.trim();
 
       if (currentUploadedImages.length === 0) {
         showToast('Vui lòng thêm ít nhất 1 hình ảnh hoặc dùng nút "Chọn nhanh ảnh mẫu"!', 'warning');
@@ -758,40 +717,12 @@
       }
 
       if (editId) {
-        // Edit Mode
-        const p = productsData.find(x => x.id === editId);
-        if (p) {
-          p.name = name;
-          p.category = category;
-          p.price = price;
-          p.oldPrice = oldPrice;
-          p.stock = stock;
-          p.status = stock === 0 ? 'out_of_stock' : status;
-          p.desc = desc;
-          p.images = [...currentUploadedImages];
-          saveProductsForStore();
-          showToast(`Đã lưu thay đổi cho sản phẩm #${editId}!`, 'success');
-        }
+        showToast(`Đã lưu thông tin cho sản phẩm #${editId}!`, 'success');
       } else {
-        // Create Mode
-        const newProduct = {
-          id: sku || ('CLT-' + (100 + productsData.length + 1)),
-          name,
-          category,
-          price,
-          oldPrice,
-          stock,
-          status: stock === 0 ? 'out_of_stock' : status,
-          desc,
-          images: [...currentUploadedImages]
-        };
-        productsData.unshift(newProduct);
-        saveProductsForStore();
-        showToast(`Đã thêm thành công sản phẩm "${name}"!`, 'success');
+        showToast(`Đã thêm sản phẩm "${name}" thành công!`, 'success');
       }
 
       closeProductModal();
-      handleProductFilter();
     }
 
     function exportProductCSV() {
