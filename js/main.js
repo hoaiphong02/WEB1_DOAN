@@ -176,9 +176,11 @@ function updateUserNavbarAvatar() {
   });
 }
 
-// Nút Thêm vào giỏ hàng: Vô hiệu hóa hoàn toàn, không có tác dụng
+// Nút Thêm vào giỏ hàng: Hiển thị thông báo thêm thành công
 function addToCart(productId, quantity = 1) {
-  // Nút thêm vào giỏ hàng đã bị vô hiệu hóa
+  const prod = SHOP_PRODUCTS.find(p => p.id == productId);
+  const name = prod ? prod.name : 'Sản phẩm';
+  alert(`Đã thêm "${name}" vào giỏ hàng thành công!`);
 }
 
 // Nút tăng giảm số lượng
@@ -465,12 +467,13 @@ document.addEventListener('DOMContentLoaded', () => {
   setupAccountPage();
   setupCustomerOrderDetail();
 
-  // Nút thêm vào giỏ hàng tại product-detail.html: Vô hiệu hóa
+  // Nút thêm vào giỏ hàng tại product-detail.html
   const btnAddCart = document.getElementById('btnAddCart');
   if (btnAddCart) {
     btnAddCart.addEventListener('click', (e) => {
       e.preventDefault();
-      // Nút bị vô hiệu hóa
+      const urlId = new URLSearchParams(window.location.search).get('id') || 1;
+      addToCart(urlId);
     });
   }
 
@@ -513,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="price">${formatMoney(p.price)}</p>
           <div class="card-actions">
             <a href="product-detail.html?id=${p.id}" class="btn-detail">Chi Tiết</a>
-            <button type="button" class="btn-quick-add" onclick="event.preventDefault()" title="Thêm ngay vào giỏ">
+            <button type="button" class="btn-quick-add" onclick="addToCart(${p.id})" title="Thêm ngay vào giỏ">
               🛒 Thêm Giỏ
             </button>
           </div>
@@ -546,8 +549,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnAdvSearch) {
       btnAdvSearch.addEventListener('click', (e) => {
         e.preventDefault();
+        window.location.href = 'search-results.html';
       });
     }
+
+    window.selectCategoryTab = function (cat, btn) {
+      document.querySelectorAll('.category-tab-btn').forEach(b => {
+        b.style.background = 'var(--navy-900)';
+        b.style.color = 'var(--text-main)';
+        b.style.fontWeight = '500';
+      });
+      if (btn) {
+        btn.style.background = 'var(--navy-800)';
+        btn.style.color = 'var(--primary)';
+        btn.style.fontWeight = '600';
+      }
+      const catSelect = document.getElementById('categoryFilter');
+      if (catSelect) {
+        catSelect.value = cat;
+      }
+    };
 
     renderUserProductList();
   }

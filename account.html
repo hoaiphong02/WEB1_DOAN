@@ -111,14 +111,19 @@
         <!-- Khung Thông Tin Tài Khoản & Lịch Sử Đơn Hàng (Hiển thị khi đã đăng nhập) -->
         <div id="accountDashboardView" style="display: none; width: 100%;">
             <div class="cart-box" style="margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
                     <div>
-                        <h2 style="margin-bottom: 4px; border-bottom: none; padding-bottom: 0;">Xin Chào, <span id="accUserName">Khách Hàng</span> 👋</h2>
-                        <p style="color: #94a3b8; font-size: 14px;">Email: <strong id="accUserEmail"></strong> • SĐT: <strong id="accUserPhone"></strong></p>
+                        <h2 style="margin-bottom: 4px; border-bottom: none; padding-bottom: 0;">Xin Chào, <span id="accUserName">Nguyễn Văn An</span> 👋</h2>
+                        <p style="color: #94a3b8; font-size: 14px;">Email: <strong id="accUserEmail">nguyenvanan@gmail.com</strong> • SĐT: <strong id="accUserPhone">0901234567</strong></p>
                     </div>
-                    <button type="button" id="btnUserLogout" class="btn-primary" style="width: auto; padding: 8px 18px; background: #334155;">
-                        Đăng Xuất
-                    </button>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button type="button" class="btn-primary" onclick="openEditProfileModal()" style="width: auto; padding: 8px 18px; font-size: 13.5px; background: #0284c7;">
+                            ✏️ Chỉnh sửa thông tin
+                        </button>
+                        <button type="button" id="btnUserLogout" class="btn-primary" style="width: auto; padding: 8px 18px; font-size: 13.5px; background: #334155;">
+                            Đăng Xuất
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -145,9 +150,63 @@
         </div>
     </div>
 
+    <!-- Modal Chỉnh sửa thông tin khách hàng -->
+    <div id="editProfileModal" class="modal-backdrop" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 16px;">
+        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; width: 100%; max-width: 480px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #f8fafc; font-size: 18px;">Chỉnh Sửa Thông Tin Cá Nhân</h3>
+                <button type="button" onclick="closeEditProfileModal()" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+            <form onsubmit="handleSaveProfile(event)">
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13.5px; color: #cbd5e1; margin-bottom: 6px;">Họ và tên:</label>
+                    <input type="text" id="editCustName" value="Nguyễn Văn An" class="form-control-customer" style="width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px;">
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13.5px; color: #cbd5e1; margin-bottom: 6px;">Số điện thoại:</label>
+                    <input type="text" id="editCustPhone" value="0901234567" class="form-control-customer" style="width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px;">
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13.5px; color: #cbd5e1; margin-bottom: 6px;">Email:</label>
+                    <input type="email" id="editCustEmail" value="nguyenvanan@gmail.com" class="form-control-customer" style="width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 13.5px; color: #cbd5e1; margin-bottom: 6px;">Địa chỉ giao hàng mặc định:</label>
+                    <input type="text" id="editCustAddress" value="123 Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh" class="form-control-customer" style="width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px;">
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeEditProfileModal()" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #475569; background: #334155; color: #f8fafc; cursor: pointer;">Hủy</button>
+                    <button type="submit" class="btn-primary" style="padding: 10px 22px; width: auto;">Lưu Thay Đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Frontend JS -->
     <script src="js/main.js"></script>
     <script>
+        function openEditProfileModal() {
+            document.getElementById('editProfileModal').style.display = 'flex';
+        }
+
+        function closeEditProfileModal() {
+            document.getElementById('editProfileModal').style.display = 'none';
+        }
+
+        function handleSaveProfile(e) {
+            e.preventDefault();
+            const newName = document.getElementById('editCustName').value.trim();
+            const newPhone = document.getElementById('editCustPhone').value.trim();
+            const newEmail = document.getElementById('editCustEmail').value.trim();
+
+            if (newName) document.getElementById('accUserName').textContent = newName;
+            if (newPhone) document.getElementById('accUserPhone').textContent = newPhone;
+            if (newEmail) document.getElementById('accUserEmail').textContent = newEmail;
+
+            closeEditProfileModal();
+            alert('Đã cập nhật thông tin khách hàng thành công!');
+        }
+
         function switchAuthTab(tab) {
             const loginForm = document.getElementById('userLoginForm');
             const registerForm = document.getElementById('userRegisterForm');

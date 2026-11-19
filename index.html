@@ -88,9 +88,18 @@
 
             <!-- Nút lọc -->
             <div class="filter-col btn-col">
-                <button id="btnAdvancedSearch" class="btn-primary">Áp dụng lọc</button>
+                <button id="btnAdvancedSearch" type="button" class="btn-primary" onclick="window.location.href='search-results.html'">Tìm</button>
             </div>
         </section>
+
+        <!-- Thanh phân loại danh mục sản phẩm nhanh -->
+        <div class="category-tabs-wrapper" style="margin: 0 0 20px 0; display: flex; align-items: center; gap: 10px; overflow-x: auto; padding: 6px 0;">
+            <span style="color: var(--text-muted); font-size: 14px; font-weight: 600; white-space: nowrap; margin-right: 4px;">Danh mục:</span>
+            <button type="button" class="category-tab-btn active" onclick="selectCategoryTab('all', this)" style="padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--navy-800); color: var(--primary); font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Tất cả</button>
+            <button type="button" class="category-tab-btn" onclick="selectCategoryTab('Áo khoác', this)" style="padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--navy-900); color: var(--text-main); font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.2s;">🧥 Áo khoác</button>
+            <button type="button" class="category-tab-btn" onclick="selectCategoryTab('Áo sơ mi/Thun', this)" style="padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--navy-900); color: var(--text-main); font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.2s;">👕 Áo sơ mi / Thun</button>
+            <button type="button" class="category-tab-btn" onclick="selectCategoryTab('Quần Jean/Khaki', this)" style="padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--navy-900); color: var(--text-main); font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.2s;">👖 Quần Jean / Khaki</button>
+        </div>
 
         <!-- Khu vực hiển thị Card sản phẩm -->
         <main class="product-content">

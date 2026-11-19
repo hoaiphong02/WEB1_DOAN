@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết Quả Tìm Kiếm - ShopCloth</title>
+    <link rel="icon" type="image/png" href="images/logo-cat.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- 1. Header / Navbar -->
+    <header class="main-header">
+        <div class="logo">
+            <a href="logged-index.html">
+                <span class="logo-badge-icon">🐱</span>
+                <span>ShopCloth</span>
+            </a>
+        </div>
+        <div class="header-right-group">
+            <nav class="navbar">
+                <!-- Nút Home icon -->
+                <a href="logged-index.html" class="nav-home-btn" title="Trang chủ">
+                    <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </a>
+            </nav>
+
+            <!-- Icon Giỏ Hàng có Badge số lượng -->
+            <a href="cart.html" class="nav-cart-btn" title="Giỏ hàng của bạn">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span id="cartCountBadge" class="cart-badge">2</span>
+            </a>
+
+            <!-- Phần người dùng -->
+            <div id="navUserSlot" style="display: inline-flex; align-items: center;">
+                <a href="account.html" class="nav-user-pill" title="Tài khoản: Nguyễn Văn A">
+                    <span class="nav-user-avatar">N</span>
+                    <span class="nav-user-name">Nguyễn Văn A</span>
+                </a>
+            </div>
+
+            <!-- Góc nút 3 gạch -->
+            <div class="menu-toggle-wrapper">
+                <button type="button" class="btn-hamburger" id="btnHamburgerMenu" title="Menu quản trị">
+                    ☰
+                </button>
+                <div class="hamburger-dropdown" id="hamburgerDropdown">
+                    <a href="admin/login.html">
+                        <span>🔐</span>
+                        <span>Đăng nhập quản trị</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Nội dung chính -->
+    <div class="container">
+        <!-- Top Filter Bar -->
+        <section class="filter-bar-horizontal">
+            <!-- Ô tìm kiếm -->
+            <div class="filter-col">
+                <label for="searchInput">🔍 Tìm kiếm tên:</label>
+                <input type="text" id="searchInput" value="Áo" placeholder="Nhập tên áo, quần...">
+            </div>
+
+            <!-- Bộ lọc danh mục -->
+            <div class="filter-col">
+                <label for="categoryFilter">🏷️ Danh mục:</label>
+                <select id="categoryFilter">
+                    <option value="all">Tất cả sản phẩm</option>
+                    <option value="Áo khoác" selected>Áo khoác</option>
+                    <option value="Áo sơ mi/Thun">Áo sơ mi / Thun</option>
+                    <option value="Quần Jean/Khaki">Quần Jean / Khaki</option>
+                </select>
+            </div>
+
+            <!-- Khoảng giá từ - đến -->
+            <div class="filter-col price-col">
+                <label>💰 Khoảng giá (VNĐ):</label>
+                <div class="price-inputs">
+                    <input type="number" id="minPrice" placeholder="Từ giá" value="200000">
+                    <span style="color: #64748b;">-</span>
+                    <input type="number" id="maxPrice" placeholder="Đến giá" value="1500000">
+                </div>
+            </div>
+
+            <!-- Nút tìm -->
+            <div class="filter-col btn-col">
+                <button type="button" class="btn-primary" onclick="window.location.href='search-results.html'">Tìm</button>
+            </div>
+        </section>
+
+        <!-- Khu vực hiển thị Card sản phẩm tìm kiếm được -->
+        <main class="product-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h2>Kết Quả Tìm Kiếm</h2>
+                    <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">Tìm thấy <strong style="color: var(--primary);">2 sản phẩm</strong> phù hợp với điều kiện tìm kiếm</p>
+                </div>
+                <a href="logged-index.html" class="back-link" style="color: #38bdf8; text-decoration: none; font-size: 14px;">&larr; Xem tất cả sản phẩm</a>
+            </div>
+            
+            <div class="product-grid" id="searchProductGrid">
+                <!-- Sản phẩm mẫu 1 -->
+                <div class="product-card">
+                    <img src="images/product-jacket-black.png" alt="Áo Khoác Da Lộn Nam Cao Cấp (Đen)">
+                    <h4>Áo Khoác Da Lộn Nam Cao Cấp (Đen)</h4>
+                    <p class="price">1.299.000 đ</p>
+                    <div class="card-actions">
+                        <a href="product-detail.html?id=1" class="btn-detail">Chi Tiết</a>
+                        <button type="button" class="btn-quick-add" onclick="addToCart(1)" title="Thêm ngay vào giỏ">
+                            🛒 Thêm Giỏ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sản phẩm mẫu 2 -->
+                <div class="product-card">
+                    <img src="images/product-jacket-brown.png" alt="Áo Khoác Bomber Da Bò Màu Nâu">
+                    <h4>Áo Khoác Bomber Da Bò Màu Nâu</h4>
+                    <p class="price">350.000 đ</p>
+                    <div class="card-actions">
+                        <a href="product-detail.html?id=2" class="btn-detail">Chi Tiết</a>
+                        <button type="button" class="btn-quick-add" onclick="addToCart(2)" title="Thêm ngay vào giỏ">
+                            🛒 Thêm Giỏ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút phân trang (vô hiệu) -->
+            <div class="pagination">
+                <button type="button" disabled>&laquo; Trang trước</button>
+                <button type="button" class="active">1</button>
+                <button type="button" disabled>Trang sau &raquo;</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Frontend JS -->
+    <script src="js/main.js"></script>
+</body>
+</html>
